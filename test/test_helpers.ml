@@ -14,12 +14,11 @@ let rec remove_dir path =
     Sys.readdir path
     |> Array.iter (fun entry -> remove_dir (Filename.concat path entry));
     Unix.rmdir path
-  end else
-    Sys.remove path
+  end
+  else Sys.remove path
 
 let cleanup_test_dir () =
-  if !test_dir <> "" && Sys.file_exists !test_dir then
-    remove_dir !test_dir
+  if !test_dir <> "" && Sys.file_exists !test_dir then remove_dir !test_dir
 
 let write_file path content =
   let full_path = Filename.concat !test_dir path in
@@ -45,30 +44,28 @@ let read_file path =
     Some content
   end
 
-let file_exists path =
-  Sys.file_exists (Filename.concat !test_dir path)
+let file_exists path = Sys.file_exists (Filename.concat !test_dir path)
 
 let run_test name f =
   (try
-    f ();
-    Printf.printf "  pass %s\n" name;
-    incr passed
-  with e ->
-    Printf.printf "  FAIL %s: %s\n" name (Printexc.to_string e);
-    incr failed);
+     f ();
+     Printf.printf "  pass %s\n" name;
+     incr passed
+   with e ->
+     Printf.printf "  FAIL %s: %s\n" name (Printexc.to_string e);
+     incr failed);
   cleanup_test_dir ()
 
-let assert_eq msg a b =
-  if a <> b then failwith msg
+let assert_eq msg a b = if a <> b then failwith msg
+let assert_true msg b = if not b then failwith msg
 
-let assert_true msg b =
-  if not b then failwith msg
-
-let assert_ok msg (r : 'a Fit.result) = match r with
+let assert_ok msg (r : 'a Fit.result) =
+  match r with
   | Fit__Result_monad.Ok x -> x
   | Fit__Result_monad.Error e -> failwith (msg ^ ": " ^ e)
 
-let assert_error msg (r : 'a Fit.result) = match r with
+let assert_error msg (r : 'a Fit.result) =
+  match r with
   | Fit__Result_monad.Error _ -> ()
   | Fit__Result_monad.Ok _ -> failwith (msg ^ ": expected error but got Ok")
 

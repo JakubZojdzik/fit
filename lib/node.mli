@@ -1,5 +1,4 @@
 type node_id = Commit.commit_id
-
 type t
 
 (* commit parent -> node *)

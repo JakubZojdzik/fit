@@ -4,11 +4,7 @@ module Commit = Commit
 module Node = Node
 module Cli = Cli
 
-type repository = {
-  path : string;
-  history : History.t;
-}
-
+type repository = { path : string; history : History.t }
 type 'a result = 'a Result_monad.t
 
 (* path -> repository *)

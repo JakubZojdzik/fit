@@ -1,4 +1,5 @@
 module Result = Result_monad
+
 type command =
   | Init
   | Commit of { message : string }
@@ -11,7 +12,8 @@ type command =
   | Diff
   | Help
 
-let help_text = {|fit - functional version control system
+let help_text =
+  {|fit - functional version control system
 
 Usage: fit <command> [options]
 
@@ -29,23 +31,30 @@ Commands:
 |}
 
 let parse args =
-  let args_list = Array.to_list args |> List.tl in  (* Skip program name *)
+  let args_list = Array.to_list args |> List.tl in
+  (* Skip program name *)
   match args_list with
-  | [] | ["help"] | ["-h"] | ["--help"] -> Result.return Help
-  | ["init"] -> Result.return Init
-  | ["commit"; "-m"; message] -> Result.return (Commit { message })
-  | ["commit"] -> Result.fail "Commit requires a message: fit commit -m <message>"
-  | ["log"] -> Result.return Log
-  | ["status"] -> Result.return Status
-  | ["checkout"; target] -> Result.return (Checkout { target })
-  | ["checkout"] -> Result.fail "Checkout requires a target: fit checkout <commit|branch>"
-  | ["revert"; target] -> Result.return (Revert { target })
-  | ["revert"] -> Result.fail "Revert requires a commit: fit revert <commit>"
-  | ["branch"] -> Result.return (Branch { name = None })
-  | ["branch"; name] -> Result.return (Branch { name = Some name })
-  | ["merge"; branch; "-m"; message] -> Result.return (Merge { branch; message })
-  | ["merge"; branch] -> 
-    Result.return (Merge { branch; message = Printf.sprintf "Merge branch '%s'" branch })
-  | ["merge"] -> Result.fail "Merge requires a branch name: fit merge <branch>"
-  | ["diff"] -> Result.return Diff
-  | cmd :: _ -> Result.fail (Printf.sprintf "Unknown command: %s. Use 'fit help'" cmd)
+  | [] | [ "help" ] | [ "-h" ] | [ "--help" ] -> Result.return Help
+  | [ "init" ] -> Result.return Init
+  | [ "commit"; "-m"; message ] -> Result.return (Commit { message })
+  | [ "commit" ] ->
+      Result.fail "Commit requires a message: fit commit -m <message>"
+  | [ "log" ] -> Result.return Log
+  | [ "status" ] -> Result.return Status
+  | [ "checkout"; target ] -> Result.return (Checkout { target })
+  | [ "checkout" ] ->
+      Result.fail "Checkout requires a target: fit checkout <commit|branch>"
+  | [ "revert"; target ] -> Result.return (Revert { target })
+  | [ "revert" ] -> Result.fail "Revert requires a commit: fit revert <commit>"
+  | [ "branch" ] -> Result.return (Branch { name = None })
+  | [ "branch"; name ] -> Result.return (Branch { name = Some name })
+  | [ "merge"; branch; "-m"; message ] ->
+      Result.return (Merge { branch; message })
+  | [ "merge"; branch ] ->
+      Result.return
+        (Merge { branch; message = Printf.sprintf "Merge branch '%s'" branch })
+  | [ "merge" ] ->
+      Result.fail "Merge requires a branch name: fit merge <branch>"
+  | [ "diff" ] -> Result.return Diff
+  | cmd :: _ ->
+      Result.fail (Printf.sprintf "Unknown command: %s. Use 'fit help'" cmd)

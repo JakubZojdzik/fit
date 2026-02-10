@@ -1,6 +1,4 @@
-type 'a t = 
-  | Ok of 'a
-  | Error of string
+type 'a t = Ok of 'a | Error of string
 
 val return : 'a -> 'a t
 val fail : string -> 'a t
