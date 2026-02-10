@@ -6,7 +6,7 @@ let return x = Ok x
 
 let fail e = Error e
 
-let bind m f =
-  match m with
-  | Ok x -> f x
+let bind f g =
+  match f with
+  | Ok x -> g x
   | Error e -> Error e

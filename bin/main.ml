@@ -1,5 +1,3 @@
-(** Entry point for the fit program. *)
-
 let () =
   let args = Sys.argv in
   match Fit.Cli.parse args with
