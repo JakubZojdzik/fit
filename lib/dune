@@ -1,0 +1,5 @@
+(library
+ (name fit)
+ (public_name fit)
+ (libraries unix)
+ (modules result_monad file diff commit node history storage workspace cli fit))

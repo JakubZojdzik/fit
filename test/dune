@@ -1,0 +1,29 @@
+(library
+ (name test_helpers)
+ (modules test_helpers)
+ (libraries fit unix))
+
+(test
+ (name test_cli)
+ (modules test_cli)
+ (libraries fit test_helpers))
+
+(test
+ (name test_diff)
+ (modules test_diff)
+ (libraries fit test_helpers))
+
+(test
+ (name test_commit)
+ (modules test_commit)
+ (libraries fit unix test_helpers))
+
+(test
+ (name test_unit)
+ (modules test_unit)
+ (libraries fit unix test_helpers))
+
+(test
+ (name test_e2e)
+ (modules test_e2e)
+ (libraries fit unix test_helpers))
