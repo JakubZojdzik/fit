@@ -7,6 +7,7 @@ type command =
   | Status
   | Checkout of { target : string }
   | Revert of { target : string }
+  | Restore of { path : string }
   | Branch of { name : string option }
   | Merge of { branch : string; message : string }
   | Diff
@@ -24,6 +25,7 @@ Commands:
   status            Show file status
   checkout <target> Switch to a commit or branch
   revert <commit>   Revert current branch to a commit
+  restore <path>    Restore last commited version of a file
   branch [name]     Create a branch or list branches
   merge <branch>    Merge a branch into the current one
   diff              Show changes since last commit
@@ -46,6 +48,9 @@ let parse args =
       Result.fail "Checkout requires a target: fit checkout <commit|branch>"
   | [ "revert"; target ] -> Result.return (Revert { target })
   | [ "revert" ] -> Result.fail "Revert requires a commit: fit revert <commit>"
+  | [ "restore"; path ] -> Result.return (Restore { path })
+  | [ "restore" ] ->
+      Result.fail "Restore requires a path to file: fit restore <path>"
   | [ "branch" ] -> Result.return (Branch { name = None })
   | [ "branch"; name ] -> Result.return (Branch { name = Some name })
   | [ "merge"; branch; "-m"; message ] ->

@@ -5,6 +5,7 @@ type command =
   | Status
   | Checkout of { target : string }
   | Revert of { target : string }
+  | Restore of { path : string }
   | Branch of { name : string option }
   | Merge of { branch : string; message : string }
   | Diff

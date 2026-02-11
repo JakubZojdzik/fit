@@ -22,6 +22,9 @@ val checkout : repository -> string -> repository result
 (* repository commit_id -> repository *)
 val revert : repository -> string -> repository result
 
+(* file_path -> unit *)
+val restore : repository -> string -> unit result
+
 (* repository branch_name -> repository *)
 val create_branch : repository -> string -> repository result
 

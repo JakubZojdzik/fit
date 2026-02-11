@@ -53,6 +53,18 @@ let revert repo target =
   let* () = save new_repo in
   Result.return new_repo
 
+let restore repo path =
+  let is_target_file = fun (p, _) -> p = path in
+  let head_state = History.reconstruct_head_state repo.history in
+  let head_file = List.find_opt is_target_file head_state in
+  match head_file with
+  | None -> Result.fail "File doesn't exist"
+  | Some file ->
+      let* current_state = Workspace.read_state repo.path in
+      let new_state = List.filter is_target_file current_state in
+      let* () = Workspace.write_state repo.path (file :: new_state) in
+      Result.return ()
+
 let create_branch repo name =
   let* new_history = History.create_branch repo.history name in
   let new_repo = { repo with history = new_history } in
@@ -131,6 +143,11 @@ let run_command cmd =
         with_repo (fun repo ->
             let* _ = revert repo target in
             Printf.printf "Reverted branch to %s\n" target;
+            Result.return ())
+    | Cli.Restore { path } ->
+        with_repo (fun repo ->
+            let _ = restore repo path in
+            Printf.printf "File %s restored\n" path;
             Result.return ())
     | Cli.Branch { name } ->
         with_repo (fun repo ->
