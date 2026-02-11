@@ -260,4 +260,54 @@ let () =
       let repo = assert_ok "commit" (Fit.commit repo "empty" "t") in
       assert_eq "log 2" (List.length (Fit.log repo)) 2);
 
+  run_test "restore_multiple_changes" (fun () ->
+      let dir = setup_test_dir () in
+      write_file "a.txt" "a1\n";
+      write_file "b.txt" "b1\n";
+      let repo = assert_ok "init" (Fit.init dir) in
+      let repo = assert_ok "c1" (Fit.commit repo "initial" "t") in
+      write_file "a.txt" "a2\n";
+      write_file "b.txt" "b2\n";
+      let _ = assert_ok "restore a" (Fit.restore repo "a.txt") in
+      assert_eq "a restored" (read_file "a.txt") (Some "a1\n");
+      assert_eq "b not restored" (read_file "b.txt") (Some "b2\n"));
+
+  run_test "restore_after_multiple_commits" (fun () ->
+      let dir = setup_test_dir () in
+      write_file "test.txt" "v1\n";
+      let repo = assert_ok "init" (Fit.init dir) in
+      let repo = assert_ok "c1" (Fit.commit repo "v1" "t") in
+      write_file "test.txt" "v2\n";
+      let repo = assert_ok "c2" (Fit.commit repo "v2" "t") in
+      write_file "test.txt" "v3\n";
+      let repo = assert_ok "c3" (Fit.commit repo "v3" "t") in
+      write_file "test.txt" "modified\n";
+      let _ = assert_ok "restore" (Fit.restore repo "test.txt") in
+      assert_eq "restored to v3" (read_file "test.txt") (Some "v3\n"));
+
+  run_test "restore_then_commit" (fun () ->
+      let dir = setup_test_dir () in
+      write_file "test.txt" "original\n";
+      let repo = assert_ok "init" (Fit.init dir) in
+      let repo = assert_ok "c1" (Fit.commit repo "initial" "t") in
+      write_file "test.txt" "modified\n";
+      let _ = assert_ok "restore" (Fit.restore repo "test.txt") in
+      let d = assert_ok "diff" (Fit.diff repo) in
+      assert_true "no changes after restore" (Fit.Diff.is_empty d);
+      write_file "test.txt" "new change\n";
+      let repo = assert_ok "c2" (Fit.commit repo "after restore" "t") in
+      assert_eq "log length" (List.length (Fit.log repo)) 3);
+
+  run_test "restore_in_subdirectory" (fun () ->
+      let dir = setup_test_dir () in
+      Unix.mkdir (Filename.concat dir "subdir") 0o755;
+      write_file "subdir/test.txt" "nested\n";
+      let repo = assert_ok "init" (Fit.init dir) in
+      let repo = assert_ok "c1" (Fit.commit repo "nested file" "t") in
+      write_file "subdir/test.txt" "modified nested\n";
+      let _ = assert_ok "restore" (Fit.restore repo "subdir/test.txt") in
+      assert_eq "restored nested"
+        (read_file "subdir/test.txt")
+        (Some "nested\n"));
+
   print_summary ()

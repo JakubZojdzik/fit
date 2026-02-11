@@ -138,4 +138,30 @@ let () =
       let repo = assert_ok "init" (Fit.init dir) in
       assert_error "self" (Fit.merge repo "master" "msg" "t"));
 
+  run_test "restore_modified_file" (fun () ->
+      let dir = setup_test_dir () in
+      write_file "test.txt" "original\n";
+      let repo = assert_ok "init" (Fit.init dir) in
+      let repo = assert_ok "commit" (Fit.commit repo "add file" "t") in
+      write_file "test.txt" "modified\n";
+      assert_eq "modified" (read_file "test.txt") (Some "modified\n");
+      let _ = assert_ok "restore" (Fit.restore repo "test.txt") in
+      assert_eq "restored" (read_file "test.txt") (Some "original\n"));
+
+  run_test "restore_deleted_file" (fun () ->
+      let dir = setup_test_dir () in
+      write_file "test.txt" "content\n";
+      let repo = assert_ok "init" (Fit.init dir) in
+      let repo = assert_ok "commit" (Fit.commit repo "add file" "t") in
+      Sys.remove (Filename.concat dir "test.txt");
+      assert_true "deleted" (not (file_exists "test.txt"));
+      let _ = assert_ok "restore" (Fit.restore repo "test.txt") in
+      assert_true "restored" (file_exists "test.txt");
+      assert_eq "content" (read_file "test.txt") (Some "content\n"));
+
+  run_test "restore_nonexistent_file" (fun () ->
+      let dir = setup_test_dir () in
+      let repo = assert_ok "init" (Fit.init dir) in
+      assert_error "nonexistent" (Fit.restore repo "ghost.txt"));
+
   print_summary ()

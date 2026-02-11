@@ -54,14 +54,13 @@ let revert repo target =
   Result.return new_repo
 
 let restore repo path =
-  let is_target_file = fun (p, _) -> p = path in
   let head_state = History.reconstruct_head_state repo.history in
-  let head_file = List.find_opt is_target_file head_state in
+  let head_file = List.find_opt (fun (p, _) -> p = path) head_state in
   match head_file with
-  | None -> Result.fail "File doesn't exist"
+  | None -> Result.fail (Printf.sprintf "File '%s' doesn't exist in HEAD" path)
   | Some file ->
       let* current_state = Workspace.read_state repo.path in
-      let new_state = List.filter is_target_file current_state in
+      let new_state = List.filter (fun (p, _) -> p <> path) current_state in
       let* () = Workspace.write_state repo.path (file :: new_state) in
       Result.return ()
 
@@ -146,7 +145,7 @@ let run_command cmd =
             Result.return ())
     | Cli.Restore { path } ->
         with_repo (fun repo ->
-            let _ = restore repo path in
+            let* _ = restore repo path in
             Printf.printf "File %s restored\n" path;
             Result.return ())
     | Cli.Branch { name } ->

@@ -40,6 +40,14 @@ let () =
   run_test "revert_no_target" (fun () ->
       assert_error "revert" (Fit.Cli.parse [| "fit"; "revert" |]));
 
+  run_test "restore" (fun () ->
+      assert_eq "restore"
+        (Fit.Cli.parse [| "fit"; "restore"; "test.txt" |])
+        (ok (Fit.Cli.Restore { path = "test.txt" })));
+
+  run_test "restore_no_path" (fun () ->
+      assert_error "restore" (Fit.Cli.parse [| "fit"; "restore" |]));
+
   run_test "branch_list" (fun () ->
       assert_eq "branch list"
         (Fit.Cli.parse [| "fit"; "branch" |])
